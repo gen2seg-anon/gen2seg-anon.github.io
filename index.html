@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Repurposing Diffusion-Based Image Generators for Monocular Depth Estimation">
+  <meta name="keywords" content="depth, estimation, monocular, scene, reconstruction">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:image:src" content="http://marigoldmonodepth.github.io/images/seg_logo_sq.jpg">
+  <meta name="twitter:title" content="Generative Segmentation">
+  <meta name="twitter:description" content="Generative Models Enable Generalizable Instance Segmentation">
+  <meta name="twitter:creator" content="@AntonObukhov1">
+
+  <title>Generative Models Enable Generalizable Instance Segmentation</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./css/bulma.min.css">
+  <link rel="stylesheet" href="./css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./css/twentytwenty.css">
+  <link rel="stylesheet" href="./css/index.css">
+  <link rel="icon" href="./images/favicon.png">
+
+  <script src="./js/jquery-3.2.1.min.js"></script>
+  <script src="./js/jquery.event.move.js"></script>
+  <script src="./js/jquery.twentytwenty.js"></script>
+  <script src="./js/bulma-carousel.min.js"></script>
+  <script src="./js/bulma-slider.min.js"></script>
+  <script src="./js/fontawesome.all.min.js"></script>
+
+  <!--MathJax-->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Generative Models Enable Generalizable Instance Segmentation</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              Anonymous Authors
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img id="teaser" width="100%" src="./images/teaser-img-only.svg" alt="Teaser image demonstrating our segmentation maps."/>
+      <h2 class="subtitle has-text-centered">
+          <i>The model above has never seen masks of people, animals, or anything remotely similar.</i> We find that <b>gen</b>erative models are able to <b>gen</b>eralize to <b>seg</b>ment object types and styles never seen in finetuning.  
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Overview</h2>
+        <div class="content has-text-justified">
+          <p>
+            By pretraining to synthesize coherent images from perturbed inputs, generative models inherently learn to understand object boundaries and scene compositions. How can we repurpose these generative representations for visual perception and scene understanding? We finetune two different types of generative models for category-agnostic instance segmentation: Stable Diffusion and ImageNet-pretrained MAE. Surprisingly, when finetuned exclusively on a narrow set of object types (indoor furnishings and cars), both models exhibit strong zero-shot generalization, accurately segmenting object types and image styles unseen in finetuning. Our models excel at segmenting fine structures, ambiguous boundaries, and occluded objects.</p>
+
+          <p>
+            The gallery below presents several images and a comparison of our finetuned Stable Diffusion and MAE-H with SAM. Use the slider and gestures to reveal details on both sides. Interestingly, MAE-H generalizes zero-shot to several images with object types and styles <b>never present in its ImageNet pretraining</b> as well, as shown below. Some artifacts are present in MAE-H's predictions as finetuning and inference are performed at 224x224 resolution to match its pretraining. <i>For SAM's predictions, black areas are where no object was detected. </i>
+          </p>
+
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+  </div>
+</section>
+
+
+<section class="section pt-0 pb-4">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Gallery</h2>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero is-light is-small">
+  <div class="hero-body pt-0">
+    <div class="container">
+      <div id="results-carousel-horizontal" class="carousel results-carousel">
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/1.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/1_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/1_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/1_mae.png">
+            </div>
+          </div>
+        </div>
+        
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/2.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/2_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/2_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/2_mae.png">
+            </div>
+          </div>
+        </div>
+        
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/3.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/3_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/3_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/3_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/4.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/4_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/4_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/4_mae.png">
+            </div>
+          </div>
+        </div>
+
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/9.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/9_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/9_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/9_mae.png">
+            </div>
+          </div>
+        </div>
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/5.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/5_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/5_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/5_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/6.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/6_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/6_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/6_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/7.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/7_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/7_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/7_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/8.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/8_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/8_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/8_mae.png">
+            </div>
+          </div>
+        </div>
+
+
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/10.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/10_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/10_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/10_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/11.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/11_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/11_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/11_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/12.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/12_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/12_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/12_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/13.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/13_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/13_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/horizontal/13_mae.png">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="hero is-light is-small">
+  <div class="hero-body pt-0">
+    <div class="container">
+      <div id="results-carousel-vertical" class="carousel results-carousel">
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/1.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/1_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/1_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/1_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/3.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/3_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/3_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/3_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/4.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/4_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/4_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/4_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/5.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/5_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/5_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/5_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/6.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/6_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/6_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/6_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/7.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/7_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/7_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/7_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/8.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/8_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/8_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/8_mae.png">
+            </div>
+          </div>
+        </div>
+          <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/2.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/2_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/2_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/2_mae.png">
+            </div>
+          </div>
+        </div>
+
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/9.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/9_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/9_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/9_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/10.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/10_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/10_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/10_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/11.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/11_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/11_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/11_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/12.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/12_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/12_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/12_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/13.webp">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/13_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/13_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/13_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/14.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/14_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/14_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/14_mae.png">
+            </div>
+          </div>
+        </div>
+
+        <div class="twoitem">
+          <div class="twentytwenty-container twentytwenty-container-top">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/15.jpg">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/15_sd.png">
+            </div>
+          </div>
+          <div class="twentytwenty-container twentytwenty-container-bottom">
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/15_sam.png">
+            </div>
+            <div class="cmpcontent">
+              <img src="./images/comparison/vertical/15_mae.png">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  $(window).on('load', function() {
+    bulmaCarousel.attach('#results-carousel-horizontal', {
+      slidesToScroll: 1,
+      slidesToShow: 3,
+      loop: true,
+      autoplay: true,
+    });
+
+    bulmaCarousel.attach('#results-carousel-vertical', {
+      slidesToScroll: 1,
+      slidesToShow: 4,
+      loop: true,
+      autoplay: true,
+    });
+
+    bulmaCarousel.attach('#results-carousel-testimonials', {
+      slidesToScroll: 1,
+      slidesToShow: 3,
+      loop: true,
+      autoplay: true,
+      breakpoints: [
+        {
+          changePoint: 50 + 260 * 2,
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          loop: true,
+          autoplay: true,
+        },
+        {
+          changePoint: 50 + 260 * 3,
+          slidesToShow: 2,
+          slidesToScroll: 1,
+          loop: true,
+          autoplay: true,
+        },
+        {
+          changePoint: 50 + 260 * 4,
+          slidesToShow: 3,
+          slidesToScroll: 1,
+          loop: true,
+          autoplay: true,
+        }
+      ],
+    });
+
+    $(".twentytwenty-container-top").twentytwenty({
+      before_label: 'Input',
+      after_label: 'Ours (SD)',
+      default_offset_pct: 0.33,
+    });
+
+    $(".twentytwenty-container-bottom").twentytwenty({
+      before_label: 'SAM',
+      after_label: 'Ours (MAE-H)',
+      default_offset_pct: 0.5,
+    });
+
+    $('.results-carousel').css({
+      'max-height': '2000px',
+      'visibility': 'visible'
+    });
+  });
+</script>
+
+
+<footer class="footer pt-4 pb-0">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Website template based on
+            <a href="https://marigoldmonodepth.github.io/">
+              Marigold
+            </a>
+            and licensed under
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">
+              CC-BY-SA-4.0
+            </a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
