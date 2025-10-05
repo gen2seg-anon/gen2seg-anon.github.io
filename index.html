@@ -88,7 +88,7 @@
             By pretraining to synthesize coherent images from perturbed inputs, generative models inherently learn to understand object boundaries and scene compositions. How can we repurpose these generative representations for visual perception and scene understanding? We finetune two different types of generative models for category-agnostic instance segmentation: Stable Diffusion and ImageNet-pretrained MAE. Surprisingly, when finetuned exclusively on a narrow set of object types (indoor furnishings and cars), both models exhibit strong zero-shot generalization, accurately segmenting object types and image styles unseen in finetuning. Our models excel at segmenting fine structures, ambiguous boundaries, and occluded objects.</p>
 
           <p>
-            The gallery below presents several images and a comparison of our finetuned Stable Diffusion and MAE-H with SAM. Use the slider and gestures to reveal details on both sides. Interestingly, MAE-H generalizes zero-shot to several images with object types and styles <b> never present in its ImageNet pretraining </b> as well, as shown below. Some artifacts are present in MAE-H's predictions as finetuning and inference are performed at 224x224 resolution to match its pretraining. <i>For SAM's predictions, black areas are where no object was detected. </i>
+            The gallery below presents several images and a comparison of our finetuned Stable Diffusion and MAE-H with SAM. Use the slider and gestures to reveal details on both sides. Some artifacts are present in MAE-H's predictions as finetuning and inference are performed at 224x224 resolution to match its pretraining. <i>For SAM's predictions, black areas are where no object was detected. </i>
           </p>
 
         </div>
